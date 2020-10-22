@@ -151,7 +151,7 @@ function wc_ctp_init_credit_card_gateway_class()
 
             $order = wc_get_order($order_id);
 
-            $response = wp_remote_get(($this->testmode ? 'https://test.' : 'https://') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . str_replace('.', '', $order->get_total()) . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl=http://medquick.tn/clictopay-check-payment&userName=' . $this->username);
+            $response = wp_remote_get(($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . str_replace('.', '', $order->get_total()) . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl=http://medquick.tn/clictopay-check-payment&userName=' . $this->username);
 
             $body = json_decode($response['body'], true);
 
@@ -177,7 +177,7 @@ function wc_ctp_init_credit_card_gateway_class()
         public function clictopay_check_payment()
         {
 
-            $response = wp_remote_get(($this->testmode ? 'https://test.' : 'https://') . 'clictopay.com/payment/rest/getOrderStatus.do?orderId=' . $_GET['orderId'] . '&password=' . $this->password . '&userName=' . $this->username);
+            $response = wp_remote_get(($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/getOrderStatus.do?orderId=' . $_GET['orderId'] . '&password=' . $this->password . '&userName=' . $this->username);
 
             $body = json_decode($response['body'], true);
 
