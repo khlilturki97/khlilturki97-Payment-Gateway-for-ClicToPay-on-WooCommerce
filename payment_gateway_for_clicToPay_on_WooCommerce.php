@@ -10,7 +10,7 @@
 /*
  * Create page that handles redirect from ClicToPay
  */
-function add_clictopay_check_payment_page()
+function wc_ctp_add_clictopay_check_payment_page()
 {
     $my_post = array(
         'post_title' => wp_strip_all_tags('ClicToPay Check Payment'),
@@ -23,13 +23,13 @@ function add_clictopay_check_payment_page()
     wp_insert_post($my_post);
 }
 
-register_activation_hook(__FILE__, 'add_clictopay_check_payment_page');
+register_activation_hook(__FILE__, 'wc_ctp_add_clictopay_check_payment_page');
 
 /*
  * This action hook registers our PHP class as a WooCommerce payment gateway
  */
-add_filter('woocommerce_payment_gateways', 'credit_card_add_gateway_class');
-function credit_card_add_gateway_class($gateways)
+add_filter('woocommerce_payment_gateways', 'wc_ctp_add_credit_card_gateway_class');
+function wc_ctp_add_credit_card_gateway_class($gateways)
 {
     $gateways[] = 'WC_ClicToPay_Credit_Card_Gateway';
     return $gateways;
@@ -38,8 +38,8 @@ function credit_card_add_gateway_class($gateways)
 /*
  * The class itself, please note that it is inside plugins_loaded action hook
  */
-add_action('plugins_loaded', 'credit_card_init_gateway_class');
-function credit_card_init_gateway_class()
+add_action('plugins_loaded', 'wc_ctp_init_credit_card_gateway_class');
+function wc_ctp_init_credit_card_gateway_class()
 {
 
     class WC_ClicToPay_Credit_Card_Gateway extends WC_Payment_Gateway
