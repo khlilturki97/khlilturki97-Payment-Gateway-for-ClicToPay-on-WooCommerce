@@ -12,7 +12,7 @@ This plugin adds a payment gateway to your store to allow receiving payments fro
 
 1. Create an account with ClicToPay
 2. Install the plugin and enable it
-3. Configure the payment gateway with your creadantials
+3. Configure the payment gateway with your credentials
 
 == 3rd party ==
 [ClicToPay](http://www.clictopay.com.tn/) is a banking service based in Tunisia which allows credit card payments through its gateway.
