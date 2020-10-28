@@ -1,9 +1,9 @@
 <?php
 /*
- * Plugin Name: Payment Gateway for ClicToPay on WooCommerce
+ * Plugin Name: test Payment Gateway for ClicToPay on WooCommerce
  * Description: Take credit card payments from ClicToPay, Tunisia.
  * Author: Khlil Turki
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 
@@ -12,18 +12,41 @@
  */
 function wc_ctp_add_clictopay_check_payment_page()
 {
-    $my_post = array(
-        'post_title' => wp_strip_all_tags('ClicToPay Check Payment'),
-        'post_content' => '[clictopay_check_payment]',
-        'post_status' => 'publish',
-        'post_author' => 1,
-        'post_type' => 'page',
-    );
+    if(get_page_by_title( 'ClicToPay Check Payment' )==null){
+        $my_post = array(
+            'post_title' => wp_strip_all_tags('ClicToPay Check Payment'),
+            'post_content' => '[clictopay_check_payment]',
+            'post_status' => 'publish',
+            'post_author' => 1,
+            'post_type' => 'page',
+        );
 
-    wp_insert_post($my_post);
+        wp_insert_post($my_post);
+    }
 }
 
 register_activation_hook(__FILE__, 'wc_ctp_add_clictopay_check_payment_page');
+
+
+/*
+ * Create failed payment page
+ */
+function wc_ctp_add_failed_payment_page()
+{
+    if(get_page_by_title( 'Failed Payment' )==null){
+        $my_post = array(
+            'post_title' => wp_strip_all_tags('Failed Payment'),
+            'post_content' => 'Failed Payment',
+            'post_status' => 'publish',
+            'post_author' => 1,
+            'post_type' => 'page',
+        );
+
+        wp_insert_post($my_post);
+    }
+}
+
+register_activation_hook(__FILE__, 'wc_ctp_add_failed_payment_page');
 
 /*
  * This action hook registers our PHP class as a WooCommerce payment gateway
@@ -151,7 +174,7 @@ function wc_ctp_init_credit_card_gateway_class()
 
             $order = wc_get_order($order_id);
 
-            $response = wp_remote_get(($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . str_replace('.', '', $order->get_total()) . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl=http://medquick.tn/clictopay-check-payment&userName=' . $this->username);
+            $response = wp_remote_get(($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . str_replace('.', '', $order->get_total()) . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl='.get_site_url().'/clictopay-check-payment&userName=' . $this->username);
 
             $body = json_decode($response['body'], true);
 
@@ -194,7 +217,7 @@ function wc_ctp_init_credit_card_gateway_class()
 
                 $redirect = $this->get_return_url($order);
             } else {
-                $redirect = 'https://medquick.tn/payment-methods/failed-payment/';
+                $redirect = get_site_url().'/failed-payment/';
             }
             wp_redirect($redirect);
             return;
