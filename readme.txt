@@ -12,13 +12,17 @@ This plugin adds a payment gateway to your store to allow receiving payments fro
 
 1. Create an account with ClicToPay
 2. Install the plugin and enable it
-3. Configure the payment gateway with your creadantials
+3. Configure the payment gateway with your credentials
 
 == 3rd party ==
 [ClicToPay](http://www.clictopay.com.tn/) is a banking service based in Tunisia which allows credit card payments through its gateway.
 Please consider reading [ClicToPay Legal Page](http://www.clictopay.com.tn/pages/mentions-legales) before using this plugin.
 
 == Changelog ==
+
+= 1.0.2 =
+* Change order name stored in ClicToPay system to <order id in woocommerce><domain name><timestamp in YmdHis format>, this allows to use the same ClicToPay account for multiple shops
+* Fix payment confirmation page display
 
 = 1.0.1 =
 * Remove hard coded url

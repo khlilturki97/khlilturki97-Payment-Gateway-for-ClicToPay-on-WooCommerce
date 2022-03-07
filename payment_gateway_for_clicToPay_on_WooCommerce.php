@@ -1,9 +1,9 @@
 <?php
 /*
- * Plugin Name: test Payment Gateway for ClicToPay on WooCommerce
+ * Plugin Name: Payment Gateway for ClicToPay on WooCommerce
  * Description: Take credit card payments from ClicToPay, Tunisia.
  * Author: Khlil Turki
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 
 
@@ -12,7 +12,7 @@
  */
 function wc_ctp_add_clictopay_check_payment_page()
 {
-    if(get_page_by_title( 'ClicToPay Check Payment' )==null){
+    if (get_page_by_title('ClicToPay Check Payment') == null) {
         $my_post = array(
             'post_title' => wp_strip_all_tags('ClicToPay Check Payment'),
             'post_content' => '[clictopay_check_payment]',
@@ -33,7 +33,7 @@ register_activation_hook(__FILE__, 'wc_ctp_add_clictopay_check_payment_page');
  */
 function wc_ctp_add_failed_payment_page()
 {
-    if(get_page_by_title( 'Failed Payment' )==null){
+    if (get_page_by_title('Failed Payment') == null) {
         $my_post = array(
             'post_title' => wp_strip_all_tags('Failed Payment'),
             'post_content' => 'Failed Payment',
@@ -174,7 +174,12 @@ function wc_ctp_init_credit_card_gateway_class()
 
             $order = wc_get_order($order_id);
 
-            $response = wp_remote_get(($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . str_replace('.', '', $order->get_total()) . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl='.get_site_url().'/clictopay-check-payment&userName=' . $this->username);
+            $order_id .= get_domain();
+            $order_id = substr($order_id, 0, 18) . date('YmdHis');
+
+            $url = ($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . str_replace('.', '', $order->get_total()) . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl=' . get_site_url() . '/clictopay-check-payment&userName=' . $this->username;
+
+            $response = wp_remote_get($url);
 
             $body = json_decode($response['body'], true);
 
@@ -211,13 +216,19 @@ function wc_ctp_init_credit_card_gateway_class()
                 // we received the payment
                 $order->payment_complete();
                 $order->reduce_order_stock();
+                $order->update_status('completed');
+                // The text for the note
+                $note = __("ClicToPay payment successful <br> Transction id: " . $body['approvalCode']);
+
+                $order->add_order_note($note);
+                update_post_meta($body['OrderNumber'], 'ClicktoPayResponse', $body);
 
                 // Empty cart
                 $woocommerce->cart->empty_cart();
 
                 $redirect = $this->get_return_url($order);
             } else {
-                $redirect = get_site_url().'/failed-payment/';
+                $redirect = get_site_url() . '/failed-payment/';
             }
             wp_redirect($redirect);
             return;
@@ -227,3 +238,26 @@ function wc_ctp_init_credit_card_gateway_class()
     add_shortcode('clictopay_check_payment', [new WC_ClicToPay_Credit_Card_Gateway, 'clictopay_check_payment']);
 }
 
+
+add_action('init', 'cwi_add_ob_start');
+function cwi_add_ob_start()
+{
+    ob_start("cwi_push_callback");
+}
+
+function cwi_push_callback($buffer)
+{
+    return $buffer;
+}
+
+add_action('wp_footer', 'cwi_flush_ob_end');
+function cwi_flush_ob_end()
+{
+    ob_end_flush();
+}
+
+function get_domain()
+{
+    $protocols = array('http://', 'https://', 'http://www.', 'https://www.', 'www.');
+    return str_replace($protocols, '', site_url());
+}
