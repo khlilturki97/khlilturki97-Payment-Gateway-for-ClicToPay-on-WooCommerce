@@ -20,6 +20,9 @@ Please consider reading [ClicToPay Legal Page](http://www.clictopay.com.tn/pages
 
 == Changelog ==
 
+= 1.0.3 =
+* Hotfix for v1.0.2, fix for confirm order after payment. The order id stored in clictopay has been changed to "<order id>__<sub string of domain name><timestamp in format "YmdHis">"
+
 = 1.0.2 =
 * Change order name stored in ClicToPay system to <order id in woocommerce><domain name><timestamp in YmdHis format>, this allows to use the same ClicToPay account for multiple shops
 * Fix payment confirmation page display

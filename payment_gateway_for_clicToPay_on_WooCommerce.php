@@ -174,10 +174,11 @@ function wc_ctp_init_credit_card_gateway_class()
 
             $order = wc_get_order($order_id);
 
-            $order_id .= get_domain();
-            $order_id = substr($order_id, 0, 18) . date('YmdHis');
+            $total = str_replace('.', '', $order->get_total());
 
-            $url = ($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . str_replace('.', '', $order->get_total()) . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl=' . get_site_url() . '/clictopay-check-payment&userName=' . $this->username;
+            $order_id = change_woocommerce_order_number($order_id);
+
+            $url = ($this->testmode ? 'https://test.' : 'https://ipay.') . 'clictopay.com/payment/rest/register.do?currency=788&amount=' . $total . '&orderNumber=' . $order_id . '&password=' . $this->password . '&returnUrl=' . get_site_url() . '/clictopay-check-payment&userName=' . $this->username;
 
             $response = wp_remote_get($url);
 
@@ -212,7 +213,8 @@ function wc_ctp_init_credit_card_gateway_class()
             if ($body['ErrorMessage'] === 'Success') {
                 global $woocommerce;
 
-                $order = wc_get_order($body['OrderNumber']);
+                $order_id = explode('__', $body['OrderNumber'])[0];
+                $order = wc_get_order($order_id);
                 // we received the payment
                 $order->payment_complete();
                 $order->reduce_order_stock();
@@ -260,4 +262,10 @@ function get_domain()
 {
     $protocols = array('http://', 'https://', 'http://www.', 'https://www.', 'www.');
     return str_replace($protocols, '', site_url());
+}
+
+function change_woocommerce_order_number($order_id)
+{
+    $order_id .= '__' . str_replace('.', '', get_domain());
+    return substr($order_id, 0, 16) . date('YmdHis');
 }
